@@ -8,8 +8,9 @@ import base64
 
 def parse_arguments():
     parser = ArgumentParser(description='Search for the flag in strings output')
-    parser.add_argument('-f', '--flag-format')
-    parser.add_argument('-d', '--debug', action='store_true') # this option is used to make the testing easier
+    parser.add_argument('flag_format', help='Specify beginning of flag format (Ex: TUCTF)')
+    parser.add_argument('file_name', help='Specify the file name')
+    parser.add_argument('-d', '--debug', action='store_true', help='Don\'t ask for input and Auto fill them') # this option is used to make the testing easier
     return parser.parse_args()
 
 
@@ -36,8 +37,8 @@ if __name__ == '__main__':
         file_name = 'image.png'
         flag_format = 'TUCTF'
     else:
-        file_name = input('Enter the file name: ')
-        flag_format = input('Enter the flag format')
+        file_name = args.file_name
+        flag_format = args.flag_format
 
     strings_output = popen(f'strings "{file_name}"').read()
     lines = strings_output.split('\n')
