@@ -3,7 +3,6 @@ from os import popen
 from argparse import ArgumentParser
 from colorama import Fore
 import base64
-base64.b
 # Forensics Strings resolver
 
 
