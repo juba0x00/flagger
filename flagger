@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
-from os import popen
+from os import popen, path, mkdir
 from argparse import ArgumentParser
 from colorama import Fore
 import base64
-import binascii
-# Forensics Strings resolver
+from re import search
+letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
+           'w', 'x', 'y', 'z']
+
+encoded_color = Fore.BLUE
+flag_color = Fore.GREEN
 
 
 def parse_arguments():
@@ -20,7 +24,7 @@ def check_plain_flag(data):
 
     for line in data:
         if flag_format in line:
-            print(f"{Fore.RED}{line}{Fore.RESET}")
+            print(f"{flag_color}{line}{Fore.RESET}")
             found = True
     return found
 
@@ -31,7 +35,7 @@ def check_base16_flag(data):
         base16_flag = base64.b16encode(flag_format.encode('ascii')).decode('ascii')
 
         if base16_flag in line:
-            print(f"{Fore.RED}{line} -> {base64.b16decode(line.encode('ascii')).decode('ascii')}{Fore.RESET}")
+            print(f"{encoded_color}{line} -> {flag_color}{base64.b16decode(line.encode('ascii')).decode('ascii')}{Fore.RESET}")
             found = True
     return found
 
@@ -43,7 +47,7 @@ def check_base32_flag(data):
         base32_flag = base32_flag[:len(base32_flag) - 1]  # to avoid the last digit unmatching
 
         if line.startswith(base32_flag):
-            print(f"{Fore.RED}{line} -> {base64.b32decode(line.encode('ascii')).decode('ascii')}{Fore.RESET}")
+            print(f"{encoded_color}{line} -> {flag_color}{base64.b32decode(line.encode('ascii')).decode('ascii')}{Fore.RESET}")
             found = True
     return found
 
@@ -55,7 +59,7 @@ def check_base64_flag(data):
         base64_flag = base64_flag[:len(base64_flag)-1]  # to avoid the last digit unmatching
 
         if base64_flag in line:
-            print(f"{Fore.RED}{line} -> {base64.b64decode(line.encode('ascii')).decode('ascii')}{Fore.RESET}")
+            print(f"{encoded_color}{line} -> {flag_color}{base64.b64decode(line.encode('ascii')).decode('ascii')}{Fore.RESET}")
             found = True
     return found
 
@@ -67,7 +71,7 @@ def check_base85_flag(data):
         base85_flag = base85_flag[:len(base85_flag)-1]  # to avoid the last digit unmatching
 
         if line.startswith(base85_flag):
-            print(f"{Fore.RED}{line} -> {base64.b85decode(line.encode('ascii')).decode('ascii')}{Fore.RESET}")
+            print(f"{encoded_color}{line} -> {flag_color}{base64.b85decode(line.encode('ascii')).decode('ascii')}{Fore.RESET}")
             found = True
     return found
 
@@ -82,12 +86,50 @@ def check_binary_flag(data):
             text = barry.decode()
 
             if flag_format in text:
-                print(f"{Fore.RED}{line} -> {text}{Fore.RESET}")
+                print(f"{encoded_color}{line} -> {flag_color}{text}{Fore.RESET}")
                 found = True
         except ValueError as e:
             # print(e)
             pass
     return found
+
+
+def rotator(string, roter):
+    rotated = []
+
+    def rotx(number, x):
+        while True:
+            find = number + roter
+            try:
+                replace = find - 26*x
+                rotated.append(letters[replace])
+                break
+            except:
+                x = x + 1
+    rotable = list(string.lower())
+    for char in rotable:
+        match = search(r'[a-z]', char)
+        if match:
+            number = 0
+            for replace in letters:
+                    if char == replace:
+                        x = 1
+                        rotx(number, x)
+                        break
+                    else:
+                        number = number + 1
+        else:
+            rotated.append(char)
+
+    string = ''.join(rotated)
+    with open(f'{file_name}_rotates/rot{roter}', 'w') as saving_file:
+        saving_file.write(string)
+
+    lines = string.split('\n')
+    for check in check_functions:
+        if check is check_binary_flag: # avoid checking the binary (rotation does not change it)
+            continue
+        check(lines[:])
 
 
 if __name__ == '__main__':
@@ -99,12 +141,18 @@ if __name__ == '__main__':
         file_name = args.file_name
         flag_format = args.flag_format
 
-    strings_output = popen(f'strings "{file_name}"').read()
+    strings_output = popen(f'strings "{file_name}" | sort | uniq').read()
     lines = strings_output.split('\n')
 
-    print(f'{Fore.GREEN}no plain-text flag found{Fore.RESET}') if not check_plain_flag(lines[:]) else None
-    print(f'{Fore.GREEN}no base16 (hexadecimal) flag found{Fore.RESET}') if not check_base16_flag(lines[:]) else None
-    print(f'{Fore.GREEN}no base32 flag found{Fore.RESET}') if not check_base32_flag(lines[:]) else None
-    print(f'{Fore.GREEN}no base64 flag found{Fore.RESET}') if not check_base64_flag(lines[:]) else None
-    print(f'{Fore.GREEN}no base85 flag found{Fore.RESET}') if not check_base85_flag(lines[:]) else None
-    print(f'{Fore.GREEN}no binary flag found{Fore.RESET}') if not check_binary_flag(lines[:]) else None
+    check_functions = [check_plain_flag, check_binary_flag, check_base16_flag, check_base32_flag, check_base64_flag, check_base85_flag]
+    for check in check_functions:
+        check(lines[:])
+
+    if not path.exists(f'{file_name}_rotates'):
+        mkdir(f'{file_name}_rotates')
+
+    # rotate and check after rotation
+    for rot in range(26):
+        rotator(strings_output, rot)
+
+    print(f'check {file_name}_rotates directory')

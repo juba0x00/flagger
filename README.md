@@ -1,4 +1,4 @@
-# Strings-Resolver
+# Flagger
 Search any flag format in `strings` output
 
 ![demo](./demo.png)
@@ -14,6 +14,7 @@ Search any flag format in `strings` output
   - [x] base2 (binary)
   - [x] base32
   - [x] base85
-- [ ] Search for the ROT13 of the flag (ROT1, ROT2, ...)
+- [x] Search for the ROT13 of the flag (ROT1, ROT2, ... ROT26)
 - [x] fix not found flags (merged between text)
   - ![fix](fix.png)
+- [ ] Search in `zsteg` output
