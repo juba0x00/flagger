@@ -4,6 +4,8 @@ from argparse import ArgumentParser
 from colorama import Fore
 from base64 import b16encode, b16decode, b32encode, b32decode, b64encode, b64decode, b85encode, b85decode
 from re import search
+from threading import Thread
+
 letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
            'w', 'x', 'y', 'z']
 
@@ -110,7 +112,7 @@ def rotator(string, roter):
 
     rotated_lines = string.split('\n')
     for check_func in check_functions:
-        if check is check_binary_flag:  # avoid checking the binary (rotation does not change it)
+        if check_func is check_binary_flag:  # avoid checking the binary (rotation does not change it)
             continue
         try:
             check_func(rotated_lines[:])
@@ -149,6 +151,6 @@ if __name__ == '__main__':
                        check_base85_flag
                        ]
     for check in check_functions:
-        check(lines[:])
+        Thread(target=check, args=[lines[:]]).start()
 
-    rotate() if not args.no_rot else None
+    Thread(target=rotate).start() if not args.no_rot else None
