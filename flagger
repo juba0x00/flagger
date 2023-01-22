@@ -2,11 +2,8 @@
 from os import popen, path, mkdir
 from argparse import ArgumentParser
 from colorama import Fore
-from base64 import b16encode, b32encode, b64encode, b64decode, b85encode
+from base64 import b16encode, b16decode, b32encode, b32decode, b64encode, b64decode, b85encode, b85decode
 from re import search
-from threading import Thread
-from cProfile import Profile 
-import pstats 
 letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
            'w', 'x', 'y', 'z']
 
@@ -19,6 +16,8 @@ def parse_arguments():
     parser.add_argument('-f', '--flag-format', help='Specify beginning of flag format (Ex: TUCTF)')
     parser.add_argument('-n', '--file-name', help='Specify the file name')
     parser.add_argument('-d', '--debug', action='store_true', help='Don\'t ask for inputs and Auto fill them')  # this option is used to make the testing easier
+    parser.add_argument('-v', '--verbose', action='store_true', help='Verbose mode')
+    parser.add_argument('-nr', '--no-rot', action='store_true', help='Disable rotation')
     return parser.parse_args()
 
 
@@ -30,10 +29,13 @@ def check_plain_flag(data):
 
 def check_base16_flag(data):
     base16_flag = b16encode(flag_format.encode('ascii')).decode('ascii')
-
     for line in data:
         if base16_flag in line:
-            print(f"{encoded_color}{line} -> {flag_color}{b16decode(line.encode('ascii')).decode('ascii')}{Fore.RESET}")
+            print("{enc_color}{enc_line} -> {dec_color}{dec_line}{rst}".format(enc_color=encoded_color, enc_line=line,
+                                                                               dec_color=flag_color,
+                                                                               dec_line=b16decode(line.upper()).decode('ascii').replace('\n', ''),
+                                                                               rst=Fore.RESET))
+            # .upper() to avoid hexdecimal decoding errors (ABC..., instead of abc..ABC..., instead of abc....)
 
 
 def check_base32_flag(data):
@@ -63,7 +65,7 @@ def check_base85_flag(data):
 def check_binary_flag(data):
     for line in data:
         try:
-            bint = int(line, 2) # binary int
+            bint = int(line, 2)  # binary int
             bnumber = bint.bit_length() + 7 // 8
             barry = bint.to_bytes(bnumber, "big")
             text = barry.decode()
@@ -106,11 +108,24 @@ def rotator(string, roter):
     with open(f'{file_name}_rotates/rot{roter}', 'w') as saving_file:
         saving_file.write(string)
 
-    lines = string.split('\n')
-    for check in check_functions:
-        if check is check_binary_flag: # avoid checking the binary (rotation does not change it)
+    rotated_lines = string.split('\n')
+    for check_func in check_functions:
+        if check is check_binary_flag:  # avoid checking the binary (rotation does not change it)
             continue
-        check(lines[:])
+        try:
+            check_func(rotated_lines[:])
+        except ValueError:
+            pass
+
+
+def rotate():
+    if not path.exists(f'{file_name}_rotates'):
+        mkdir(f'{file_name}_rotates')
+
+    # rotate and check after rotation
+    for rot in range(26):
+        rotator(strings_output[:], rot)
+    print(f'check {file_name}_rotates directory')
 
 
 if __name__ == '__main__':
@@ -123,18 +138,17 @@ if __name__ == '__main__':
         flag_format = args.flag_format
 
     strings_output = popen(f'strings "{file_name}" | sort | uniq').read()
+    print(strings_output) if args.verbose else None
     lines = strings_output.split('\n')
 
-    check_functions = [check_plain_flag, check_binary_flag, check_base16_flag, check_base32_flag, check_base64_flag, check_base85_flag]
+    check_functions = [check_plain_flag,
+                       check_binary_flag,
+                       check_base16_flag,
+                       check_base32_flag,
+                       check_base64_flag,
+                       check_base85_flag
+                       ]
     for check in check_functions:
-        # Thread(target=check, args=[lines[:]]).start()
         check(lines[:])
 
-    if not path.exists(f'{file_name}_rotates'):
-        mkdir(f'{file_name}_rotates')
-
-    # rotate and check after rotation
-    for rot in range(26):
-        rotator(strings_output[:], rot)
-
-    print(f'check {file_name}_rotates directory')
+    rotate() if not args.no_rot else None
