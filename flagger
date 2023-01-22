@@ -2,8 +2,11 @@
 from os import popen, path, mkdir
 from argparse import ArgumentParser
 from colorama import Fore
-import base64
+from base64 import b16encode, b32encode, b64encode, b64decode, b85encode
 from re import search
+from threading import Thread
+from cProfile import Profile 
+import pstats 
 letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
            'w', 'x', 'y', 'z']
 
@@ -15,69 +18,49 @@ def parse_arguments():
     parser = ArgumentParser(description='Search for the flag in strings output')
     parser.add_argument('-f', '--flag-format', help='Specify beginning of flag format (Ex: TUCTF)')
     parser.add_argument('-n', '--file-name', help='Specify the file name')
-    parser.add_argument('-d', '--debug', action='store_true', help='Don\'t ask for input and Auto fill them')  # this option is used to make the testing easier
+    parser.add_argument('-d', '--debug', action='store_true', help='Don\'t ask for inputs and Auto fill them')  # this option is used to make the testing easier
     return parser.parse_args()
 
 
 def check_plain_flag(data):
-    found = False
-
     for line in data:
         if flag_format in line:
             print(f"{flag_color}{line}{Fore.RESET}")
-            found = True
-    return found
 
 
 def check_base16_flag(data):
-    found = False
-    for line in data:
-        base16_flag = base64.b16encode(flag_format.encode('ascii')).decode('ascii')
+    base16_flag = b16encode(flag_format.encode('ascii')).decode('ascii')
 
+    for line in data:
         if base16_flag in line:
-            print(f"{encoded_color}{line} -> {flag_color}{base64.b16decode(line.encode('ascii')).decode('ascii')}{Fore.RESET}")
-            found = True
-    return found
+            print(f"{encoded_color}{line} -> {flag_color}{b16decode(line.encode('ascii')).decode('ascii')}{Fore.RESET}")
 
 
 def check_base32_flag(data):
-    found = False
+    base32_flag = b32encode(flag_format.encode('ascii')).decode('ascii').replace('=', '')
+    base32_flag = base32_flag[:len(base32_flag) - 1]  # to avoid the last digit unmatching
     for line in data:
-        base32_flag = base64.b32encode(flag_format.encode('ascii')).decode('ascii').replace('=', '')
-        base32_flag = base32_flag[:len(base32_flag) - 1]  # to avoid the last digit unmatching
-
         if line.startswith(base32_flag):
-            print(f"{encoded_color}{line} -> {flag_color}{base64.b32decode(line.encode('ascii')).decode('ascii')}{Fore.RESET}")
-            found = True
-    return found
+            print(f"{encoded_color}{line} -> {flag_color}{b32decode(line.encode('ascii')).decode('ascii')}{Fore.RESET}")
 
 
 def check_base64_flag(data):
-    found = False
+    base64_flag = b64encode(flag_format.encode('ascii')).decode('ascii').replace('=', '')
+    base64_flag = base64_flag[:len(base64_flag)-1]  # to avoid the last digit unmatching
     for line in data:
-        base64_flag = base64.b64encode(flag_format.encode('ascii')).decode('ascii').replace('=', '')
-        base64_flag = base64_flag[:len(base64_flag)-1]  # to avoid the last digit unmatching
-
         if base64_flag in line:
-            print(f"{encoded_color}{line} -> {flag_color}{base64.b64decode(line.encode('ascii')).decode('ascii')}{Fore.RESET}")
-            found = True
-    return found
+            print(f"{encoded_color}{line} -> {flag_color}{b64decode(line.encode('ascii')).decode('ascii')}{Fore.RESET}")
 
 
 def check_base85_flag(data):
-    found = False
+    base85_flag = b85encode(flag_format.encode('ascii')).decode('ascii').replace('=', '')
+    base85_flag = base85_flag[:len(base85_flag)-1]  # to avoid the last digit unmatching
     for line in data:
-        base85_flag = base64.b85encode(flag_format.encode('ascii')).decode('ascii').replace('=', '')
-        base85_flag = base85_flag[:len(base85_flag)-1]  # to avoid the last digit unmatching
-
         if line.startswith(base85_flag):
-            print(f"{encoded_color}{line} -> {flag_color}{base64.b85decode(line.encode('ascii')).decode('ascii')}{Fore.RESET}")
-            found = True
-    return found
+            print(f"{encoded_color}{line} -> {flag_color}{b85decode(line.encode('ascii')).decode('ascii')}{Fore.RESET}")
 
 
 def check_binary_flag(data):
-    found = False
     for line in data:
         try:
             bint = int(line, 2) # binary int
@@ -87,11 +70,9 @@ def check_binary_flag(data):
 
             if flag_format in text:
                 print(f"{encoded_color}{line} -> {flag_color}{text}{Fore.RESET}")
-                found = True
         except ValueError as e:
             # print(e)
             pass
-    return found
 
 
 def rotator(string, roter):
@@ -146,6 +127,7 @@ if __name__ == '__main__':
 
     check_functions = [check_plain_flag, check_binary_flag, check_base16_flag, check_base32_flag, check_base64_flag, check_base85_flag]
     for check in check_functions:
+        # Thread(target=check, args=[lines[:]]).start()
         check(lines[:])
 
     if not path.exists(f'{file_name}_rotates'):
@@ -153,6 +135,6 @@ if __name__ == '__main__':
 
     # rotate and check after rotation
     for rot in range(26):
-        rotator(strings_output, rot)
+        rotator(strings_output[:], rot)
 
     print(f'check {file_name}_rotates directory')
