@@ -144,10 +144,9 @@ def shift(text, shifts):
         for char in line:
             try: # avoid out of range code
                 shifted_back += chr(ord(char)-shifts)
-
-                print(shifted_back)
             except ValueError:
                 pass 
+                
             shifted_forward += chr(ord(char)+shifts)
         if flag_format in shifted_back:
             print(f"{encoded_color}{line} -> {flag_color}{shifted_back}{Fore.RESET}")
