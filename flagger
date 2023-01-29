@@ -111,6 +111,10 @@ def rotator(string, roter):
         saving_file.write(string)
 
     rotated_lines = string.split('\n')
+    for line in rotated_lines:
+        if flag_format.lower() in line:
+            print(f"{encoded_color}ROT{roter}: {flag_color}{line}{Fore.RESET}")
+
     for check_func in check_functions:
         if check_func is check_binary_flag:  # avoid checking the binary (rotation does not change it)
             continue
@@ -125,9 +129,33 @@ def rotate():
         mkdir(f'{file_name}_rotates')
 
     # rotate and check after rotation
-    for rot in range(26):
+    for rot in range(1, 26):
         rotator(strings_output[:], rot)
     print(f'check {file_name}_rotates directory')
+
+
+def shift(text, shifts):
+    shifted_back = ""
+    shifted_forward = ""
+    for line in text: 
+        if line == "": 
+            # skip empty lines
+            continue
+        for char in line:
+            try: # avoid out of range code
+                shifted_back += chr(ord(char)-shifts)
+
+                print(shifted_back)
+            except ValueError:
+                pass 
+            shifted_forward += chr(ord(char)+shifts)
+        if flag_format in shifted_back:
+            print(f"{encoded_color}{line} -> {flag_color}{shifted_back}{Fore.RESET}")
+            pass
+        elif flag_format in shifted_forward:
+            print(f"{encoded_color}{line} -> {flag_color}{shifted_forward}{Fore.RESET}")
+        shifted_back = ""
+        shifted_forward = ""
 
 
 if __name__ == '__main__':
@@ -150,7 +178,11 @@ if __name__ == '__main__':
                        check_base64_flag,
                        check_base85_flag
                        ]
+
     for check in check_functions:
         Thread(target=check, args=[lines[:]]).start()
 
     Thread(target=rotate).start() if not args.no_rot else None
+
+    for shifts in range(2, 26):
+        Thread(target=shift, args=[lines[:], shifts]).start() if not args.no_rot else None

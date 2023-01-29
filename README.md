@@ -17,4 +17,4 @@ Search any flag format in `strings` output
 - [x] Search for the ROT13 of the flag (ROT1, ROT2, ... ROT26)
 - [x] fix not found flags (merged between text)
   - ![fix](fix.png)
-- [ ] Search in `zsteg` output
+  
