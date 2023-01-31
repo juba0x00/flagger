@@ -3,8 +3,10 @@ from os import popen, path, mkdir
 from argparse import ArgumentParser
 from colorama import Fore
 from base64 import b16encode, b16decode, b32encode, b32decode, b64encode, b64decode, b85encode, b85decode
+from base45 import b45encode, b45decode
 from re import search
 from threading import Thread
+
 
 letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
            'w', 'x', 'y', 'z']
@@ -17,7 +19,8 @@ def parse_arguments():
     parser = ArgumentParser(description='Search for the flag in strings output')
     parser.add_argument('-f', '--flag-format', help='Specify beginning of flag format (Ex: TUCTF)')
     parser.add_argument('-n', '--file-name', help='Specify the file name')
-    parser.add_argument('-d', '--debug', action='store_true', help='Don\'t ask for inputs and Auto fill them')  # this option is used to make the testing easier
+    parser.add_argument('-d', '--debug', action='store_true',
+                        help='Don\'t ask for inputs and Auto fill them')  # this option is used to make the testing easier
     parser.add_argument('-v', '--verbose', action='store_true', help='Verbose mode')
     parser.add_argument('-nr', '--no-rot', action='store_true', help='Disable rotation')
     return parser.parse_args()
@@ -35,7 +38,8 @@ def check_base16_flag(data):
         if base16_flag in line:
             print("{enc_color}{enc_line} -> {dec_color}{dec_line}{rst}".format(enc_color=encoded_color, enc_line=line,
                                                                                dec_color=flag_color,
-                                                                               dec_line=b16decode(line.upper()).decode('ascii').replace('\n', ''),
+                                                                               dec_line=b16decode(line.upper()).decode(
+                                                                                   'ascii').replace('\n', ''),
                                                                                rst=Fore.RESET))
             # .upper() to avoid hexdecimal decoding errors (ABC..., instead of abc..ABC..., instead of abc....)
 
@@ -48,9 +52,17 @@ def check_base32_flag(data):
             print(f"{encoded_color}{line} -> {flag_color}{b32decode(line.encode('ascii')).decode('ascii')}{Fore.RESET}")
 
 
+def check_base45_flag(data):
+    base45_flag = b45encode(flag_format.encode('ascii')).decode('ascii').replace('=', '')
+    base45_flag = base45_flag[:len(base45_flag) - 2]  # to avoid the last digit unmatching
+    for line in data:
+        if line.startswith(base45_flag):
+            print(f"{encoded_color}{line} -> {flag_color}{b45decode(line.encode('ascii')).decode('ascii')}{Fore.RESET}")
+
+
 def check_base64_flag(data):
     base64_flag = b64encode(flag_format.encode('ascii')).decode('ascii').replace('=', '')
-    base64_flag = base64_flag[:len(base64_flag)-1]  # to avoid the last digit unmatching
+    base64_flag = base64_flag[:len(base64_flag) - 1]  # to avoid the last digit unmatching
     for line in data:
         if base64_flag in line:
             print(f"{encoded_color}{line} -> {flag_color}{b64decode(line.encode('ascii')).decode('ascii')}{Fore.RESET}")
@@ -58,7 +70,7 @@ def check_base64_flag(data):
 
 def check_base85_flag(data):
     base85_flag = b85encode(flag_format.encode('ascii')).decode('ascii').replace('=', '')
-    base85_flag = base85_flag[:len(base85_flag)-1]  # to avoid the last digit unmatching
+    base85_flag = base85_flag[:len(base85_flag) - 1]  # to avoid the last digit unmatching
     for line in data:
         if line.startswith(base85_flag):
             print(f"{encoded_color}{line} -> {flag_color}{b85decode(line.encode('ascii')).decode('ascii')}{Fore.RESET}")
@@ -74,8 +86,7 @@ def check_binary_flag(data):
 
             if flag_format in text:
                 print(f"{encoded_color}{line} -> {flag_color}{text}{Fore.RESET}")
-        except ValueError as e:
-            # print(e)
+        except ValueError:
             pass
 
 
@@ -86,23 +97,24 @@ def rotator(string, roter):
         while True:
             find = number + roter
             try:
-                replace = find - 26*x
+                replace = find - 26 * x
                 rotated.append(letters[replace])
                 break
             except:
                 x = x + 1
+
     rotable = list(string.lower())
     for char in rotable:
         match = search(r'[a-z]', char)
         if match:
             number = 0
             for replace in letters:
-                    if char == replace:
-                        x = 1
-                        rotx(number, x)
-                        break
-                    else:
-                        number = number + 1
+                if char == replace:
+                    x = 1
+                    rotx(number, x)
+                    break
+                else:
+                    number = number + 1
         else:
             rotated.append(char)
 
@@ -137,17 +149,17 @@ def rotate():
 def shift(text, shifts):
     shifted_back = ""
     shifted_forward = ""
-    for line in text: 
-        if line == "": 
+    for line in text:
+        if line == "":
             # skip empty lines
             continue
         for char in line:
-            try: # avoid out of range code
-                shifted_back += chr(ord(char)-shifts)
+            try:  # avoid out of range code
+                shifted_back += chr(ord(char) - shifts)
             except ValueError:
-                pass 
-                
-            shifted_forward += chr(ord(char)+shifts)
+                pass
+
+            shifted_forward += chr(ord(char) + shifts)
         if flag_format in shifted_back:
             print(f"{encoded_color}{line} -> {flag_color}{shifted_back}{Fore.RESET}")
             pass
@@ -174,6 +186,7 @@ if __name__ == '__main__':
                        check_binary_flag,
                        check_base16_flag,
                        check_base32_flag,
+                       check_base45_flag,
                        check_base64_flag,
                        check_base85_flag
                        ]

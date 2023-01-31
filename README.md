@@ -8,7 +8,7 @@ Search any flag format in `strings` output
 - [x] Search for the plain-text flag 
 - [ ] Search for the bases of the flag (base64, 42, ...)
   - [x] base64 
-  - [ ] base42
+  - [x] base45
   - [x] base16 (hex)
   - [ ] base8 (octal)
   - [x] base2 (binary)
