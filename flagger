@@ -15,6 +15,12 @@ letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
 encoded_color = Fore.BLUE
 flag_color = Fore.GREEN
 
+def echo(encoded_flag, decoded_flag):
+    """
+    Print colored encoded and decoded flag 
+    """
+    print(f"{encoded_color}{encoded_flag} -> {flag_color}{decoded_flag}{Fore.RESET}")
+
 
 def parse_arguments():
     parser = ArgumentParser(description='Search for the flag in strings output')
@@ -37,11 +43,7 @@ def check_base16_flag(data):
     base16_flag = b16encode(flag_format.encode('ascii')).decode('ascii')
     for line in data:
         if base16_flag in line:
-            print("{enc_color}{enc_line} -> {dec_color}{dec_line}{rst}".format(enc_color=encoded_color, enc_line=line,
-                                                                               dec_color=flag_color,
-                                                                               dec_line=b16decode(line.upper()).decode(
-                                                                                   'ascii').replace('\n', ''),
-                                                                               rst=Fore.RESET))
+            echo(encoded_flag=line, decoded_flag=b16decode(line.upper()).decode('ascii').replace('\n', ''))
             # .upper() to avoid hexdecimal decoding errors (ABC..., instead of abc..ABC..., instead of abc....)
 
 
@@ -50,7 +52,7 @@ def check_base32_flag(data):
     base32_flag = base32_flag[:len(base32_flag) - 1]  # to avoid the last digit unmatching
     for line in data:
         if line.startswith(base32_flag):
-            print(f"{encoded_color}{line} -> {flag_color}{b32decode(line.encode('ascii')).decode('ascii')}{Fore.RESET}")
+            echo(line, b32decode(line.encode('ascii')).decode('ascii'))
 
 
 def check_base45_flag(data):
@@ -58,7 +60,7 @@ def check_base45_flag(data):
     base45_flag = base45_flag[:len(base45_flag) - 2]  # to avoid the last digit unmatching
     for line in data:
         if line.startswith(base45_flag):
-            print(f"{encoded_color}{line} -> {flag_color}{b45decode(line.encode('ascii')).decode('ascii')}{Fore.RESET}")
+            echo(line, b45decode(line.encode('ascii')).decode('ascii'))
 
 
 def check_base64_flag(data):
@@ -66,7 +68,7 @@ def check_base64_flag(data):
     base64_flag = base64_flag[:len(base64_flag) - 1]  # to avoid the last digit unmatching
     for line in data:
         if base64_flag in line:
-            print(f"{encoded_color}{line} -> {flag_color}{b64decode(line.encode('ascii')).decode('ascii')}{Fore.RESET}")
+            echo(line, b64decode(line.encode('ascii')).decode('ascii'))
 
 
 def check_base85_flag(data):
@@ -74,7 +76,7 @@ def check_base85_flag(data):
     base85_flag = base85_flag[:len(base85_flag) - 1]  # to avoid the last digit unmatching
     for line in data:
         if line.startswith(base85_flag):
-            print(f"{encoded_color}{line} -> {flag_color}{b85decode(line.encode('ascii')).decode('ascii')}{Fore.RESET}")
+            echo(line, b85decode(line.encode('ascii')).decode('ascii'))
 
 
 def check_binary_flag(data):
@@ -86,7 +88,7 @@ def check_binary_flag(data):
             text = barry.decode()
 
             if flag_format in text:
-                print(f"{encoded_color}{line} -> {flag_color}{text}{Fore.RESET}")
+                echo(line, text)
         except ValueError:
             pass
 
@@ -126,7 +128,7 @@ def rotator(string, roter):
     rotated_lines = string.split('\n')
     for line in rotated_lines:
         if flag_format.lower() in line:
-            print(f"{encoded_color}ROT{roter}: {flag_color}{line}{Fore.RESET}")
+            echo(f"ROT{roter}", line)
 
     for check_func in check_functions:
         if check_func is check_binary_flag:  # avoid checking the binary (rotation does not change it)
@@ -162,10 +164,10 @@ def shift(text, shifts):
 
             shifted_forward += chr(ord(char) + shifts)
         if flag_format in shifted_back:
-            print(f"{encoded_color}{line} -> {flag_color}{shifted_back}{Fore.RESET}")
+            echo(line, shifted_back)
             pass
         elif flag_format in shifted_forward:
-            print(f"{encoded_color}{line} -> {flag_color}{shifted_forward}{Fore.RESET}")
+            echo(line, shifted_forward)
         shifted_back = ""
         shifted_forward = ""
 
@@ -174,7 +176,7 @@ def crack_md5(hash):
     if findall(r"([a-fA-F\d]{32})", hash):  # check if it's MD5 hash
         try:
             result = get(f"https://www.nitrxgen.net/md5db/{hash}").text
-            print(f"{encoded_color}{hash} -> {flag_color}{result}{Fore.RESET}") if result is not '' else None
+            echo(hash, result) if result != '' else None
 
         except ConnectionError:
             print("Connection Error: Check your internet connectivity")
