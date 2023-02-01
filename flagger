@@ -4,8 +4,9 @@ from argparse import ArgumentParser
 from colorama import Fore
 from base64 import b16encode, b16decode, b32encode, b32decode, b64encode, b64decode, b85encode, b85decode
 from base45 import b45encode, b45decode
-from re import search
+from re import search, findall
 from threading import Thread
+from requests import get 
 
 
 letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
@@ -169,6 +170,18 @@ def shift(text, shifts):
         shifted_forward = ""
 
 
+def crack_md5(hash):
+    if findall(r"([a-fA-F\d]{32})", hash):  # check if it's MD5 hash
+        try:
+            result = get(f"https://www.nitrxgen.net/md5db/{hash}").text
+            print(f"{encoded_color}{hash} -> {flag_color}{result}{Fore.RESET}") if result is not '' else None
+
+        except ConnectionError:
+            print("Connection Error: Check your internet connectivity")
+        finally:
+            pass
+
+
 if __name__ == '__main__':
     args = parse_arguments()
     if args.debug:
@@ -188,7 +201,7 @@ if __name__ == '__main__':
                        check_base32_flag,
                        check_base45_flag,
                        check_base64_flag,
-                       check_base85_flag
+                       check_base85_flag,
                        ]
 
     for check in check_functions:
@@ -198,3 +211,6 @@ if __name__ == '__main__':
 
     for shifts in range(2, 26):
         Thread(target=shift, args=[lines[:], shifts]).start() if not args.no_rot else None
+
+    for hash in lines[:]:
+        Thread(target=crack_md5, args=[hash]).start()
