@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+#global imports
 from os import popen, path, mkdir
 from argparse import ArgumentParser
 from colorama import Fore
@@ -7,20 +8,22 @@ from base45 import b45encode, b45decode
 from re import search, findall
 from threading import Thread
 from requests import get 
+
+#local imports
 import oct
 
+#variables
 alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
            'w', 'x', 'y', 'z']
-
 encoded_color = Fore.BLUE
 flag_color = Fore.GREEN
 
+#--- INPUT ---#
 def echo(encoded_flag, decoded_flag):
     """
     Print colored encoded and decoded flag 
     """
     print(f"{encoded_color}{encoded_flag} -> {flag_color}{decoded_flag}{Fore.RESET}")
-
 
 def parse_arguments():
     parser = ArgumentParser(description='Search for the flag in strings output')
@@ -32,7 +35,7 @@ def parse_arguments():
     parser.add_argument('-nr', '--no-rot', action='store_true', help='Disable rotation')
     return parser.parse_args()
 
-
+#--- PROCESS ---#
 def check_plain_flag(data):
     for line in data:
         if flag_format in line:
@@ -194,7 +197,7 @@ def crack_md5(hash):
         finally:
             pass
 
-
+#--- OUTPUT ---#
 if __name__ == '__main__':
     args = parse_arguments()
     if args.debug:
