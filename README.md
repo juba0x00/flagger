@@ -10,7 +10,7 @@ Search any flag format in `strings` output
   - [x] base64 
   - [x] base45
   - [x] base16 (hex)
-  - [ ] base8 (octal)
+  - [x] base8 (octal)
   - [x] base2 (binary)
   - [x] base32
   - [x] base85
@@ -19,8 +19,8 @@ Search any flag format in `strings` output
   - ![fix](fix.png)
   
   
-  ## Notes
+## Notes
 
-- [ ] Rotator function doesn't have to create a folder, instead it can do all the possible rotates (1-25) then check for the flag format that was entered (ex: -f TUCTF), and then output the flag if found.
-- [ ] We shall check for all bases (2, 8, 16, 32, 42, 45, 58, 62, 64, 85).
-- [ ] Double decoding could be implemented lately.
+- [ ] Check for bases (42, 32, 42, 58, 62)
+- [ ] ROT8000, XOR
+- [ ] Mono-Alphabetic bruteforcer
