@@ -134,21 +134,13 @@ def rotator(cipher_text, key):
     rotated.append(result)
 
     string = ''.join(rotated)
-    with open(f'{file_name}_rotates/rot{roter}', 'w') as saving_file:
+    with open(f'{file_name}_rotates/rot{key}', 'w') as saving_file:
         saving_file.write(string)
 
     rotated_lines = string.split('\n')
     for line in rotated_lines:
         if flag_format.lower() in line:
-            echo(f"ROT{roter}", line)
-
-    for check_func in check_functions:
-        if check_func is check_binary_flag:  # avoid checking the binary (rotation does not change it)
-            continue
-        try:
-            check_func(rotated_lines[:])
-        except ValueError:
-            pass
+            echo(f"ROT{key}", line)
 
 def rotate():
     if not path.exists(f'{file_name}_rotates'):
@@ -157,10 +149,9 @@ def rotate():
     # rotate and check after rotation
     for rot in range(1, 26):
         rotator(strings_output[:], rot)
-    print(f'check {file_name}_rotates directory')
 
     #merge (concatenate) rotated files
-    system(f'cat ./{file_name}_rotates/* > {file_name}_rotates/merged.txt')
+    popen(f'cat ./{file_name}_rotates/* > {file_name}_rotates/merged.txt')
     print(f'check {file_name}_rotates directory')
            
 def shift(text, shifts):
