@@ -7,7 +7,7 @@ from base45 import b45encode, b45decode
 from re import search, findall
 from threading import Thread
 from requests import get 
-
+import oct
 
 letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
            'w', 'x', 'y', 'z']
@@ -78,7 +78,12 @@ def check_base85_flag(data):
         if line.startswith(base85_flag):
             echo(line, b85decode(line.encode('ascii')).decode('ascii'))
 
-
+def check_base8_flag(data):
+    base8_flag = oct.oct_encode(flag_format)
+    for line in data:
+        if line.startswith(base8_flag):
+            print(f"{encoded_color}{line} -> {flag_color}{oct.oct_decode(line)}{Fore.RESET}")
+                      
 def check_binary_flag(data):
     for line in data:
         try:
@@ -204,6 +209,7 @@ if __name__ == '__main__':
                        check_base45_flag,
                        check_base64_flag,
                        check_base85_flag,
+                       check_base8_flag
                        ]
 
     for check in check_functions:
