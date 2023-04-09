@@ -97,34 +97,38 @@ def check_binary_flag(data):
         except ValueError:
             pass
 
-
-def rotator(string, roter):
+def rotator(cipher_text, key):
     rotated = []
+    shifted_alphabet = [''] * len(alphabet)
 
-    def rotx(number, x):
-        while True:
-            find = number + roter
-            try:
-                replace = find - 26 * x
-                rotated.append(letters[replace])
+    #fill shifted_alphabet
+    for i in range(key, len(alphabet)):
+        shifted_alphabet[i-key] = alphabet[i]
+
+    shifted_alphabet[len(alphabet)-(key):] = alphabet[:key]
+
+    #substitution
+    deciphered = [''] * len(cipher_text)
+    exists = False
+
+    for i in range(len(cipher_text)):
+        for j in range(len(shifted_alphabet)):
+            if cipher_text[i].casefold() == shifted_alphabet[j].casefold():
+                deciphered[i] = alphabet[j]
+                exists = True
                 break
-            except:
-                x = x + 1
+            else:
+                exists = False
 
-    rotable = list(string.lower())
-    for char in rotable:
-        match = search(r'[a-z]', char)
-        if match:
-            number = 0
-            for replace in letters:
-                if char == replace:
-                    x = 1
-                    rotx(number, x)
-                    break
-                else:
-                    number = number + 1
-        else:
-            rotated.append(char)
+            if not exists:
+                deciphered[i] = cipher_text[i]
+
+    #put the result in a string
+    result = ''
+    for i in range(len(deciphered)):
+        result = result + deciphered[i]
+    
+    rotated.append(result)
 
     string = ''.join(rotated)
     with open(f'{file_name}_rotates/rot{roter}', 'w') as saving_file:
@@ -143,7 +147,6 @@ def rotator(string, roter):
         except ValueError:
             pass
 
-
 def rotate():
     if not path.exists(f'{file_name}_rotates'):
         mkdir(f'{file_name}_rotates')
@@ -153,7 +156,10 @@ def rotate():
         rotator(strings_output[:], rot)
     print(f'check {file_name}_rotates directory')
 
-
+    #merge (concatenate) rotated files
+    system(f'cat ./{file_name}_rotates/* > {file_name}_rotates/merged.txt')
+    print(f'check {file_name}_rotates directory')
+           
 def shift(text, shifts):
     shifted_back = ""
     shifted_forward = ""
