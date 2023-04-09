@@ -21,6 +21,6 @@ Search any flag format in `strings` output
   
 ## Notes
 
-- [ ] Check for bases (42, 32, 42, 58, 62)
+- [ ] Check for bases (32, 42, 58, 62)
 - [ ] ROT8000, XOR
 - [ ] Mono-Alphabetic bruteforcer
