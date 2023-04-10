@@ -90,7 +90,7 @@ def check_base8_flag(data):
     base8_flag = oct.oct_encode(flag_format)
     for line in data:
         if base8_flag in line:
-            print(f"{encoded_color}{line} -> {flag_color}{oct.oct_decode(line)}{Fore.RESET}")
+            echo(line, oct.oct_decode(line))
 
 
 def check_binary_flag(data):
