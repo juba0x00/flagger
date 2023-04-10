@@ -1,10 +1,10 @@
 DESTDIR ?= /usr/local/bin
 
 install:
-	@sudo cp flagger $(DESTDIR)
-	@sudo chmod +x $(DESTDIR)/flagger
-	@echo "flagger has been installed"
+	@sudo cp ftf $(DESTDIR)
+	@sudo chmod +x $(DESTDIR)/ftf
+	@echo "Find the Flag has been installed"
 
 uninstall:
-	@sudo rm -f $(DESTDIR)/flagger
-	@echo "flagger has been removed"
+	@sudo rm -f $(DESTDIR)/ftf
+	@echo "Find the Flag has been removed"

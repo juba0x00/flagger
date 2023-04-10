@@ -1,4 +1,4 @@
-# Flagger
+# FtF: Find the Flag
 Search any flag format in `strings` output
 
 ![demo](./demo.png)
@@ -15,12 +15,6 @@ Search any flag format in `strings` output
   - [x] base32
   - [x] base85
 - [x] Search for the ROT13 of the flag (ROT1, ROT2, ... ROT26)
-- [x] fix not found flags (merged between text)
-  - ![fix](fix.png)
-  
-  
-## Notes
-
 - [ ] Check for bases (32, 42, 58, 62)
 - [ ] ROT8000, XOR
 - [ ] Mono-Alphabetic bruteforcer
