@@ -13,7 +13,7 @@ from modules import utils
 from modules.binwalker import BinWalker
 
 
-class Rorensics:
+class Flagger:
     encoded_color = Fore.BLUE
     flag_color = Fore.GREEN
     online = utils.online()
@@ -44,18 +44,18 @@ class Rorensics:
         """
         Print colored encoded and decoded flag
         """
-        if Rorensics.silent:
+        if Flagger.silent:
             print(
-                f"{Rorensics.flag_color}{decoded_flag}{Fore.RESET}")
+                f"{Flagger.flag_color}{decoded_flag}{Fore.RESET}")
         else:
             print(
-                f"[{encoding}] {Rorensics.encoded_color}{encoded_flag} -> {Rorensics.flag_color}{decoded_flag}{Fore.RESET}")
+                f"[{encoding}] {Flagger.encoded_color}{encoded_flag} -> {Flagger.flag_color}{decoded_flag}{Fore.RESET}")
 
     @staticmethod
     def __check_plain_flag(data):
         for line in data:
-            if Rorensics.flag_format.lower() in line.lower():
-                Rorensics.echo('plain', '', line)
+            if Flagger.flag_format.lower() in line.lower():
+                Flagger.echo('plain', '', line)
 
     @staticmethod
     def __check_binary_flag(data):
@@ -66,71 +66,71 @@ class Rorensics:
                 barry = bint.to_bytes(bnumber, "big")
                 text = barry.decode()
 
-                if Rorensics.flag_format.lower() in text.lower():
-                    Rorensics.echo('binary', line, text)
+                if Flagger.flag_format.lower() in text.lower():
+                    Flagger.echo('binary', line, text)
             except Exception as e:
                 pass
 
     @staticmethod
     def __check_base8_flag(data):
-        base8_flag = oct.oct_encode(Rorensics.flag_format)
+        base8_flag = oct.oct_encode(Flagger.flag_format)
         for line in data:
             matches = findall(r'\b0[0-7]+', line)
             for match in matches:
                 if base8_flag in match:
-                    Rorensics.echo('octal', line, match.oct_decode(line))
+                    Flagger.echo('octal', line, match.oct_decode(line))
 
     @staticmethod
     def __check_base16_flag(data):
-        base16_flag = b16encode(Rorensics.flag_format.encode('ascii')).decode('ascii')
+        base16_flag = b16encode(Flagger.flag_format.encode('ascii')).decode('ascii')
         for line in data:
             matches = findall(r'\b[0-9A-Fa-f]+', line)
             for match in matches:
                 if base16_flag.lower() in match.lower():
-                    Rorensics.echo('hexadecimal', encoded_flag=line,
+                    Flagger.echo('hexadecimal', encoded_flag=line,
                                    decoded_flag=b16decode(match.upper()).decode('ascii').replace('\n', ''))
                     #  .upper() to avoid hexdecimal decoding errors (ABC..., instead of abc..ABC..., instead of abc....)
 
     @staticmethod
     def __check_base32_flag(data):
-        base32_flag = b32encode(Rorensics.flag_format.encode('ascii')).decode('ascii').replace('=', '')
+        base32_flag = b32encode(Flagger.flag_format.encode('ascii')).decode('ascii').replace('=', '')
         base32_flag = base32_flag[:len(base32_flag) - 1]  # to avoid the last digit unmatching
         for line in data:
             matches = findall(r'\b[A-Z2-7]+=*', line)
             for match in matches:
                 if base32_flag in match:
-                    Rorensics.echo('base32', line, b32decode(match.encode('ascii')).decode('ascii'))
+                    Flagger.echo('base32', line, b32decode(match.encode('ascii')).decode('ascii'))
 
     @staticmethod
     def __check_base45_flag(data):
-        base45_flag = b45encode(Rorensics.flag_format.encode('ascii')).decode('ascii').replace('=', '')
+        base45_flag = b45encode(Flagger.flag_format.encode('ascii')).decode('ascii').replace('=', '')
         base45_flag = base45_flag[:len(base45_flag) - 2]  # to avoid the last digit unmatching
         for line in data:
             matches = findall(r'\b[A-Z0-9 $%*+\-.\/:]+', line)
             for match in matches:
                 if base45_flag in match:
-                    Rorensics.echo('base45', line, b45decode(match.encode('ascii')).decode('ascii'))
+                    Flagger.echo('base45', line, b45decode(match.encode('ascii')).decode('ascii'))
 
     @staticmethod
     def __check_base64_flag(data):
-        base64_flag = b64encode(Rorensics.flag_format.encode('ascii')).decode('ascii').replace('=', '')
+        base64_flag = b64encode(Flagger.flag_format.encode('ascii')).decode('ascii').replace('=', '')
 
         base64_flag = base64_flag[:len(base64_flag) - 1]  # to avoid the last digit unmatchinglf.__check_base16_flag,
         for line in data:
             matches = findall(r'\b[A-Za-z0-9+/]{4,}(?:==?|=\n)?', line)
             for match in matches:
                 if base64_flag in match:
-                    Rorensics.echo('base64', line, b64decode(match.encode('ascii')).decode('ascii'))
+                    Flagger.echo('base64', line, b64decode(match.encode('ascii')).decode('ascii'))
 
     @staticmethod
     def __check_base85_flag(data):
-        base85_flag = b85encode(Rorensics.flag_format.encode('ascii')).decode('ascii').replace('=', '')
+        base85_flag = b85encode(Flagger.flag_format.encode('ascii')).decode('ascii').replace('=', '')
         base85_flag = base85_flag[:len(base85_flag) - 1]  # to avoid the last digit unmatching
         for line in data:
             matches = findall(r'\b[!-u]+', line)
             for match in matches:
                 if base85_flag in match:
-                    Rorensics.echo('base85', match, b85decode(line.encode('ascii')).decode('ascii'))
+                    Flagger.echo('base85', match, b85decode(line.encode('ascii')).decode('ascii'))
 
     def rotator(self, data, key):
         for line in data:
@@ -162,8 +162,8 @@ class Rorensics:
             # Put the result in a string
             rotated = ''.join(deciphered)
             with open(f'{self.file_name}_rotates/rot{key}', 'w') as saving_file:
-                if Rorensics.flag_format.lower() in rotated:
-                    Rorensics.echo('rot', f"ROT{key}", rotated)
+                if Flagger.flag_format.lower() in rotated:
+                    Flagger.echo('rot', f"ROT{key}", rotated)
                 else:
                     saving_file.write(f'{rotated}\n')
 
@@ -193,11 +193,11 @@ class Rorensics:
                 except Exception as e:
                     pass
 
-            if Rorensics.flag_format in shifted_back:
-                Rorensics.echo(f'shift{shifts}', line, shifted_back)
+            if Flagger.flag_format in shifted_back:
+                Flagger.echo(f'shift{shifts}', line, shifted_back)
 
-            elif Rorensics.flag_format in shifted_forward:
-                Rorensics.echo(f'shift{shifts}', line, shifted_forward)
+            elif Flagger.flag_format in shifted_forward:
+                Flagger.echo(f'shift{shifts}', line, shifted_forward)
             shifted_back = ""
             shifted_forward = ""
 
@@ -206,9 +206,9 @@ class Rorensics:
         if hashes := findall(r"([a-fA-F\d]{32})", line):  # extract MD5 hashes from the line
             for hash in hashes:
                 try:
-                    print(f'{hash} -> md5 hash detected') if Rorensics.verbose else None
+                    print(f'{hash} -> md5 hash detected') if Flagger.verbose else None
                     result = get(f"https://www.nitrxgen.net/md5db/{hash}").text
-                    Rorensics.echo('md5', hash, result) if result != '' else None
+                    Flagger.echo('md5', hash, result) if result != '' else None
 
                 except Exception as e:
                     pass
@@ -221,7 +221,7 @@ class Rorensics:
         if not self.no_rot:
             self.rotate()
             for file in listdir(f'{self.file_name}_rotates/'):
-                flag_fetcher = Rorensics(filename=f'{self.file_name}_rotates/{file}', no_rot=True)  # don't rotate
+                flag_fetcher = Flagger(filename=f'{self.file_name}_rotates/{file}', no_rot=True)  # don't rotate
                 flag_fetcher.fetch()
 
     def check_all_shifts(self):
@@ -229,7 +229,7 @@ class Rorensics:
             Thread(target=self.shift, args=[self.strings_lines[:], shifts]).start() if not self.no_rot else None
 
     def check_all_hashes(self):
-        if Rorensics.online:
+        if Flagger.online:
             for line in self.strings_lines[:]:
                 Thread(target=self.crack_md5, args=[line]).start()
 
@@ -257,20 +257,20 @@ def main():
     else:
         print('File Not Found :(')
         exit(0)
-    Rorensics.flag_format = args.flag_format  # set the flag format for the class (all the instances)
+    Flagger.flag_format = args.flag_format  # set the flag format for the class (all the instances)
     # I added the previous line here to be executed at the first instance only
     # , if it's in the constructor it will be executed in each instance creation
-    Rorensics.verbose = args.verbose
-    Rorensics.silent = args.silent
+    Flagger.verbose = args.verbose
+    Flagger.silent = args.silent
 
     for file in valid_files:  # iterate over all the valid files and fetch the flag
-        flag_fetcher = Rorensics(filename=file, no_rot=args.no_rot)
+        flag_fetcher = Flagger(filename=file, no_rot=args.no_rot)
         flag_fetcher.fetch()
         walker = BinWalker(flag_fetcher.file_name)
         if walker.extracted:
             files = listdir(f'{flag_fetcher.file_name}.extracted')
             for extracted_file in files:
-                child_flag_fetcher = Rorensics(filename=f'{flag_fetcher.file_name}.extracted/{extracted_file}',
+                child_flag_fetcher = Flagger(filename=f'{flag_fetcher.file_name}.extracted/{extracted_file}',
                                                no_rot=False)
                 child_flag_fetcher.fetch()
 
