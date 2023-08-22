@@ -14,7 +14,6 @@ class BinWalker:
             binary_file (str): The binary file to be extracted.
         """
         self.binary_file = binary_file
-        self.binwalk_installed = self.is_binwalk_installed
 
         if self.binwalk_installed and self.extract():
             self.extracted = True
@@ -22,7 +21,7 @@ class BinWalker:
             self.extracted = False
 
     @property
-    def is_binwalk_installed(self):
+    def binwalk_installed(self):
         """
         Checks if binwalk is installed.
 
@@ -45,11 +44,11 @@ class BinWalker:
             print('File does not exist')
             return False
 
-        if path.exists(f'{self.binary_file}.extracted'):
+        if path.exists(f'{self.binary_file}_extracted'):
             return True
 
         subprocess.run(['binwalk', '-e', self.binary_file], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        if path.exists(f'{self.binary_file}.extracted'):
+        if path.exists(f'{self.binary_file}_extracted'):
             return True
         else:
             return False

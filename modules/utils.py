@@ -1,6 +1,9 @@
 from argparse import ArgumentParser
 from requests import get
 from PIL import Image
+from os import walk, path
+from re import match
+from shutil import rmtree
 
 
 def online():
@@ -35,3 +38,15 @@ def is_png(file_path):
             return image.format == 'PNG'
     except IOError:
         return False
+    
+
+def get_valid_files(directory: str) -> list:
+    valid_files = []
+    for root, _, files in walk(directory):
+        if match(r".*_rotates$", root):
+            rmtree(root)
+        else:
+            for file in files:
+                valid_files.append(path.join(root, file))
+            
+    return valid_files
