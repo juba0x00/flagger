@@ -12,6 +12,7 @@ from modules import oct
 from modules import utils
 from modules.binwalker import BinWalker
 from multiprocessing import Process
+import modules.banner
 
 class Flagger:
     encoded_color = Fore.BLUE
