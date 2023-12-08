@@ -66,10 +66,10 @@ class Flagger:
         """
         if Flagger.silent:
             print(
-                f"{Flagger.flag_color}{decoded_flag}{Fore.RESET}")
+                f"{utils.COLORS['FLAG']}{decoded_flag}{utils.COLORS['RESET']}")
         else:
             print(
-                f"[{encoding}] {Flagger.encoded_color}{encoded_flag} -> {Flagger.flag_color}{decoded_flag}{Fore.RESET}")
+                f"[{encoding}] {utils.COLORS['ENC_FLAG']}{encoded_flag} -> {utils.COLORS['FLAG']}{decoded_flag}{utils.COLORS['RESET']}")
 
     @staticmethod
     def __check_plain_flag(data):
@@ -263,7 +263,7 @@ def main():
     args = utils.parse_arguments()
     Flagger.flag_format = args.flag_format  # set the flag format for the class (all the instances)
     # I added the previous line here to be executed at the first instance only
-    # , if it's in the constructor it will be executed in each instance creation
+    # , if it's in the constructor it will be executed in each instance initiation
     Flagger.verbose = args.verbose
     Flagger.silent = args.silent
     Process(target=Flagger, args=(args.file_name, args.no_rot)).start()  # create an instance of the class

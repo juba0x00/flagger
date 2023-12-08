@@ -4,6 +4,16 @@ from PIL import Image
 from os import walk, path
 from re import match
 from shutil import rmtree
+import colorama
+from abc import ABC, abstractmethod
+
+COLORS = {
+    "ERR": f"{colorama.Style.BRIGHT}{colorama.Fore.YELLOW}",
+    "INFO": f"{colorama.Style.DIM}{colorama.Fore.YELLOW}",
+    "FLAG": f"{colorama.Fore.RED}{colorama.Fore.GREEN}",
+    "ENC_FLAG": f"{colorama.Fore.RED}{colorama.Fore.BLUE}",
+    "RESET": colorama.Style.RESET_ALL,
+}
 
 
 def online():
@@ -32,13 +42,13 @@ def parse_arguments():
 
     return parser.parse_args()
 
-def is_png(file_path):
+def is_png(file_path) -> bool:
     try:
         with Image.open(file_path) as image:
             return image.format == 'PNG'
     except IOError:
         return False
-    
+
 
 def get_valid_files(directory: str) -> list:
     valid_files = []
@@ -48,5 +58,5 @@ def get_valid_files(directory: str) -> list:
         else:
             for file in files:
                 valid_files.append(path.join(root, file))
-            
+
     return valid_files
