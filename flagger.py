@@ -15,14 +15,12 @@ from multiprocessing import Process
 import modules.banner
 
 class Flagger:
-    encoded_color = Fore.BLUE
-    flag_color = Fore.GREEN 
     online = utils.online() # check if online
     flag_format: str # flag format for all instances
     verbose: bool # unified verbose for all instances
     silent: bool # unified silent for all instances
 
-    def __init__(self, filename, no_rot):
+    def __init__(self, filename, no_rot, walk=True):
         valid_files = []
         if path.exists(filename):
             if path.isdir(filename):  # get all the valid files in the directory
@@ -31,11 +29,13 @@ class Flagger:
                     Process(target=Flagger, args=(file, no_rot)).start()
                 return None # don't fetch flags for the directory itself
             else:
-                walker = BinWalker(filename)
-                if walker.extracted:
-                    files = listdir(f'{filename}_extracted')
-                    for extracted_file in files:
-                        Process(target=Flagger, args=(f'{filename}_extracted/{extracted_file}', False)).start()
+                if walk:
+                    walker = BinWalker(filename)
+                    if walker.extracted:
+                        files = listdir(walker.extract_dir)
+                        for extracted_file in files:
+                            Process(target=Flagger, args=(f'{walker.extract_dir}/{extracted_file}', False, False)).start()
+
 
         else:
             print('File Not Found :(')
@@ -54,7 +54,7 @@ class Flagger:
             self.__check_base85_flag
         ]
         self.strings_output = popen(
-            f'strings "{self.file_name}" | sort | uniq').read()  # didn't use readlines() to remove \n in the following line
+            f'strings "{self.file_name}" | sort -u').read()  # didn't use readlines() to remove \n in the following line
         self.strings_lines = self.strings_output.split('\n')
         del self.strings_output
         self.__fetch()
