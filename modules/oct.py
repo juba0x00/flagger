@@ -12,19 +12,7 @@ example2: '124125103124106173164150151163137151163137157143164141154175' <--> TU
 
 #---- ENCODE ----#
 def oct_encode(word):
-    #string to ascii
-    word_ascii = []
-    for i in word: word_ascii.append(ord(i))
-
-    #ascii to oct
-    word_oct = ''
-    for i in word_ascii: word_oct += oct(i)
-
-    #remove leading 0s
-    word_oct = word_oct.split('0o')
-    word_oct = ''.join(word_oct)
-
-    return word_oct
+    return ''.join([oct(ord(char))[2:] for char in plain])
 
 #---- DECODE ----# 
 def oct_decode(word):
