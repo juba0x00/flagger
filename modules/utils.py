@@ -36,6 +36,9 @@ def parse_arguments() -> Namespace:
     parser.add_argument('-s', '--silent', action='store_true', help='print flags only')
     parser.add_argument('-i', '--ignore-case', action='store_true', help='ignore case sensitivity')
     parser.add_argument('-nr', '--no-rot', action='store_true', help='Disable rotation')
+    parser.add_argument('-t', '--threads', type=int, help='Number of threads to use', default=10)
+    parser.add_argument('-p', '--processes', type=int, help='Number of processes to use', default=10)
+    
     #! Future options
         #TODO --crack
         #TODO --steg
