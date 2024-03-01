@@ -3,8 +3,7 @@ from subprocess import Popen, run, PIPE, DEVNULL
 from random import randint
 from socket import socket, AF_INET, SOCK_STREAM
 from modules.utils import COLORS
-from colorama import Fore
-from modules.utils import COLORS
+
 
 class BinWalker:
     """
@@ -50,7 +49,7 @@ class BinWalker:
         """
         if path.exists(self.extract_dir):
             self.extracted = True
-            self.info = f"{self.__file_path} extracted before, skip extracting" 
+            self.info = f"{COLORS['INFO']}{self.__file_path} extracted before, skip extracting{COLORS['RESET']}" 
             print(self.info) # TODO: change to logger
             
             return True
@@ -79,7 +78,7 @@ class BinWalker:
                 checker = socket(AF_INET, SOCK_STREAM)
                 checker.connect(('localhost', rand_port))
                 while data:=checker.recv(1024):
-                    print(f'{Fore.GREEN}Binwalk Extracting: {data.decode()}\r', end=Fore.RESET)
+                    print(f"{COLORS['INFO']}Binwalk Extracting: {data.decode()}\r", end=COLORS['RESET'])
                 
                 else:
                     break
@@ -91,7 +90,7 @@ class BinWalker:
                 break
             
         if path.exists(self.extract_dir):
-            self.info = f"{Fore.CYAN}binwalk extracted {self.__file_path} successfully{Fore.RESET}"
+            self.info = f"{COLORS['INFO']}binwalk extracted {self.__file_path} successfully{COLORS['RESET']}"
             print(self.info) # TODO: change to logger
             self.extracted = True
     
