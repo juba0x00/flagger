@@ -4,6 +4,7 @@ from random import randint
 from socket import socket, AF_INET, SOCK_STREAM
 from modules.utils import COLORS
 from colorama import Fore
+from modules.utils import COLORS
 
 class BinWalker:
     """
@@ -48,7 +49,10 @@ class BinWalker:
             bool: True if the binary data has been extracted before, False otherwise.
         """
         if path.exists(self.extract_dir):
-            self.info = f"{self.__file_path} extracted before, skip extracting" #TODO: change to logger
+            self.extracted = True
+            self.info = f"{self.__file_path} extracted before, skip extracting" 
+            print(self.info) # TODO: change to logger
+            
             return True
         else:
             return False
@@ -88,6 +92,7 @@ class BinWalker:
             
         if path.exists(self.extract_dir):
             self.info = f"{Fore.CYAN}binwalk extracted {self.__file_path} successfully{Fore.RESET}"
+            print(self.info) # TODO: change to logger
             self.extracted = True
     
     
