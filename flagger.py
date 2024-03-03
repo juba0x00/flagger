@@ -1,26 +1,29 @@
 #!/usr/bin/env python3
-#  global imports
+# global imports
 from os import popen, path, mkdir, listdir
-from colorama import Fore
 from base64 import b16encode, b16decode, b32encode, b32decode, b64encode, b64decode, b85encode, b85decode
 from base45 import b45encode, b45decode
 from re import findall
 from threading import Thread
 from requests import get
-#  local imports
+from multiprocessing import Process
+from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
+# local imports
 from modules import oct
 from modules import utils
 from modules.binwalker import BinWalker
-from multiprocessing import Process
 import modules.banner
+
 
 class Flagger:
     online = utils.online() # check if online
     flag_format: str # flag format for all instances
-    verbose: bool # unified verbose for all instances
-    silent: bool # unified silent for all instances
+    verbose: bool # verbose for all instances
+    silent: bool # silent for all instances
+    processes: int # number of processes for all instances
+    threads: int # number of threads for all instances
 
-    def __init__(self, filename, no_rot, walk=True):
+    def __init__(self, filename, no_rot, walk=False):
         valid_files = []
         if path.exists(filename):
             if path.isdir(filename):  # get all the valid files in the directory
@@ -28,14 +31,14 @@ class Flagger:
                 for file in valid_files:
                     Process(target=Flagger, args=(file, no_rot)).start()
                 return None # don't fetch flags for the directory itself
-            else:
-                if walk:
+            elif walk:
                     walker = BinWalker(filename)
                     if walker.extracted:
                         files = listdir(walker.extract_dir)
+                        # with ProcessPoolExecutor(max_workers=Flagger.processes) as executor:
+                            # executor.map(Flagger, [f'{walker.extract_dir}/{extracted_file}' for extracted_file in files], [False] * len(files), [False] * len(files))
                         for extracted_file in files:
                             Process(target=Flagger, args=(f'{walker.extract_dir}/{extracted_file}', False, False)).start()
-
 
         else:
             print('File Not Found :(')
@@ -228,28 +231,46 @@ class Flagger:
                     pass
 
     def check_all_bases(self):
+        # with ThreadPoolExecutor(max_workers=Flagger.threads) as executor:
+            # executor.map(self.check_functions, [self.strings_lines[:]] * len(self.check_functions))
         for check in self.check_functions:
-            Thread(target=check, args=[self.strings_lines[:]]).start()
+            # print(f'checking {check}')
+            with ThreadPoolExecutor(max_workers=Flagger.threads) as executor:
+                executor.submit(check, self.strings_lines[:])
+            
+            # Thread(target=check, args=[self.strings_lines[:]]).start()
 
     def check_all_rotations(self):
         if not self.no_rot:
             if not path.exists(f'{self.file_name}_rotates'):
                 mkdir(f'{self.file_name}_rotates')
+
             for key in range(1, 26):
-                Thread(target=self.rotate, args=(key,)).start()
+                with ThreadPoolExecutor(max_workers=Flagger.threads) as executor:
+                    executor.submit(self.rotate, key)
+                # Thread(target=self.rotate, args=(key,)).start()
+
+            # with ProcessPoolExecutor(Flagger.processes) as executor:
+                # executor.submit(Flagger, f'{self.file_name}_rotates/', True)
             Process(target=Flagger, args=(f'{self.file_name}_rotates/', True)).start()  # don't rotate, avoid infinite loop
 
     def check_all_shifts(self):
-        for shifts in range(2, 26):
-            Thread(target=self.shift, args=[self.strings_lines[:], shifts]).start() if not self.no_rot else None
+
+        with ThreadPoolExecutor(max_workers=Flagger.threads) as executor:
+            # executor.map(self.shift, [self.strings_lines[:]] * 24, range(2, 26))
+            for shifts in range(2, 26):
+                executor.submit(self.shift, self.strings_lines[:], shifts)
+        #     Thread(target=self.shift, args=[self.strings_lines[:], shifts]).start() if not self.no_rot else None
             
     def check_all_hashes(self):
         if Flagger.online:
-            for line in self.strings_lines[:]:
-                Thread(target=self.crack_md5, args=[line]).start()
+            with ThreadPoolExecutor(max_workers=Flagger.threads) as executor:
+                executor.map(self.crack_md5, self.strings_lines[:])
+            # for line in self.strings_lines[:]:
+                # Thread(target=self.crack_md5, args=[line]).start()
 
     def __fetch(self):
-        print(f'{"_" * 10} searching in {self.file_name} {"_" * 10}')
+        # print(f'{"_" * 10} searching in {self.file_name} {"_" * 10}')
         self.check_all_bases()
         
         self.check_all_rotations()
@@ -266,7 +287,14 @@ def main():
     # , if it's in the constructor it will be executed in each instance initiation
     Flagger.verbose = args.verbose
     Flagger.silent = args.silent
-    Process(target=Flagger, args=(args.file_name, args.no_rot)).start()  # create an instance of the class
+    Flagger.processes = args.processes
+    Flagger.threads = args.threads
+
+    
+    with ProcessPoolExecutor(max_workers=Flagger.processes) as executor:
+        executor.submit(Flagger, args.file_name, args.no_rot, walk=True)
+        
+    # Process(target=Flagger, args=(args.file_name, args.no_rot)).start()  # create an instance of the class
 
 
 if __name__ == '__main__':
