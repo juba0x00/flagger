@@ -5,6 +5,6 @@ colorama==0.4.6
 idna==3.4
 pip==23.0.1
 requests==2.28.2
-setuptools==65.5.0
+setuptools==65.5.1
 urllib3==1.26.15
 pillow==10.2.0
