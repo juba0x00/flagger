@@ -37,6 +37,7 @@ class BinWalker:
             return True
         else:
             self.info = "binwalk is not installed"
+            print(self.info)
             return False
 
 
@@ -51,10 +52,8 @@ class BinWalker:
             self.extracted = True
             self.info = f"{COLORS['INFO']}{self.__file_path} extracted before, skip extracting{COLORS['RESET']}" 
             print(self.info) # TODO: change to logger
-            
             return True
         else:
-            self.info = "binwalk is not installed"
             return False
         
 
@@ -67,6 +66,7 @@ class BinWalker:
         """
         if not path.exists(self.__file_path):
             self.info = F"{COLORS['ERR']}File does not exist{COLORS['RESET']}"
+            print(self.info)
             return False
 
 
