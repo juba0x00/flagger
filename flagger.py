@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # global imports
-from os import popen, path, mkdir, listdir
+from os import popen, path, mkdir, listdir, killpg, getpid
 from base64 import b16encode, b16decode, b32encode, b32decode, b64encode, b64decode, b85encode, b85decode
 from base45 import b45encode, b45decode
 from re import findall
@@ -8,6 +8,7 @@ from threading import Thread
 from requests import get
 from multiprocessing import Process
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
+from signal import signal, SIGINT, SIGTERM
 # local imports
 from modules import oct
 from modules import utils
@@ -281,6 +282,10 @@ class Flagger:
         self.check_all_hashes()
 
 
+def terminate_all_processes(sig, frame):
+    killpg(getpid(), SIGTERM)
+
+
 def main():
     args = utils.parse_arguments()
     Flagger.flag_format = args.flag_format  # set the flag format for the class (all the instances)
@@ -299,4 +304,5 @@ def main():
 
 
 if __name__ == '__main__':
+    signal(SIGINT, terminate_all_processes)
     main()
