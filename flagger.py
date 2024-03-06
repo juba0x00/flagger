@@ -29,7 +29,9 @@ class Flagger:
             if path.isdir(filename):  # get all the valid files in the directory
                 valid_files = utils.get_valid_files(filename)
                 for file in valid_files:
-                    Process(target=Flagger, args=(file, no_rot)).start()
+                    with ProcessPoolExecutor(max_workers=Flagger.processes) as executor:
+                            executor.submit(Flagger, file, no_rot, no_walk)
+                    # Process(target=Flagger, args=(file, no_rot)).start()
                 return None # don't fetch flags for the directory itself
             elif not no_walk:
                     walker = BinWalker(filename)
@@ -251,9 +253,9 @@ class Flagger:
                     executor.submit(self.rotate, key)
                 # Thread(target=self.rotate, args=(key,)).start()
 
-            # with ProcessPoolExecutor(Flagger.processes) as executor:
-                # executor.submit(Flagger, f'{self.file_name}_rotates/', True)
-            Process(target=Flagger, args=(f'{self.file_name}_rotates/', True)).start()  # don't rotate, avoid infinite loop
+            with ProcessPoolExecutor(Flagger.processes) as executor:
+                executor.submit(Flagger, f'{self.file_name}_rotates/', True)
+            # Process(target=Flagger, args=(f'{self.file_name}_rotates/', True)).start()  # don't rotate, avoid infinite loop
 
     def check_all_shifts(self):
 
