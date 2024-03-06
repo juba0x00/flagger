@@ -35,10 +35,11 @@ class Flagger:
                     walker = BinWalker(filename)
                     if walker.extracted:
                         files = listdir(walker.extract_dir)
-                        # with ProcessPoolExecutor(max_workers=Flagger.processes) as executor:
-                            # executor.map(Flagger, [f'{walker.extract_dir}/{extracted_file}' for extracted_file in files], [False] * len(files), [False] * len(files))
-                        for extracted_file in files:
-                            Process(target=Flagger, args=(f'{walker.extract_dir}/{extracted_file}', False, False)).start()
+                        with ProcessPoolExecutor(max_workers=Flagger.processes) as executor:
+                            for extracted_file in files:
+                                executor.submit(Flagger, f'{walker.extract_dir}/{extracted_file}', no_rot=False, no_walk=True)
+                        # for extracted_file in files:
+                            # Process(target=Flagger, args=(f'{walker.extract_dir}/{extracted_file}', False, True)).start()
 
         else:
             print('File Not Found :(')
@@ -270,7 +271,7 @@ class Flagger:
                 # Thread(target=self.crack_md5, args=[line]).start()
 
     def __fetch(self):
-        # print(f'{"_" * 10} searching in {self.file_name} {"_" * 10}')
+        print(f'{"_" * 10} searching in {self.file_name} {"_" * 10}')
         self.check_all_bases()
         
         self.check_all_rotations()
@@ -292,7 +293,7 @@ def main():
 
     
     with ProcessPoolExecutor(max_workers=Flagger.processes) as executor:
-        executor.submit(Flagger, args.file_name, args.no_rot, no_walk=args.no_walk)
+        executor.submit(Flagger, filename=args.file_name, no_rot=args.no_rot, no_walk=args.no_walk)
         
     # Process(target=Flagger, args=(args.file_name, args.no_rot)).start()  # create an instance of the class
 
