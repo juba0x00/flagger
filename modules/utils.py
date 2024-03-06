@@ -39,7 +39,7 @@ def parse_arguments() -> Namespace:
     parser.add_argument('-t', '--threads', type=int, help='Number of threads to use', default=5)
     parser.add_argument('-p', '--processes', type=int, help='Number of processes to use', default=10)
     parser.add_argument('-nw', '--no-walk', action='store_true', help='Do not walk through directories', default=False)
-    
+    parser.add_argument('-ch', '--check-hash', action='store_true', help='Check hash of the file', default=False)
     #! Future options
         #TODO --crack
         #TODO --steg

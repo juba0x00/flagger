@@ -4,9 +4,7 @@ from os import popen, path, mkdir, listdir, killpg, getpid
 from base64 import b16encode, b16decode, b32encode, b32decode, b64encode, b64decode, b85encode, b85decode
 from base45 import b45encode, b45decode
 from re import findall
-from threading import Thread
 from requests import get
-from multiprocessing import Process
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 from signal import signal, SIGINT, SIGTERM
 # local imports
@@ -23,6 +21,7 @@ class Flagger:
     silent: bool # silent for all instances
     processes: int # number of processes for all instances
     threads: int # number of threads for all instances
+    check_hash: bool # no hash for all instances
 
     def __init__(self, filename, no_rot, no_walk=True):
         valid_files = []
@@ -281,8 +280,7 @@ class Flagger:
         
         self.check_all_shifts()
         
-        self.check_all_hashes()
-
+        self.check_all_hashes() if Flagger.check_hash else None
 
 def terminate_all_processes(sig, frame):
     killpg(getpid(), SIGTERM)
@@ -297,7 +295,7 @@ def main():
     Flagger.silent = args.silent
     Flagger.processes = args.processes
     Flagger.threads = args.threads
-
+    Flagger.check_hash = args.check_hash
     
     with ProcessPoolExecutor(max_workers=Flagger.processes) as executor:
         executor.submit(Flagger, filename=args.file_name, no_rot=args.no_rot, no_walk=args.no_walk)
