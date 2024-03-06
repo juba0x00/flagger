@@ -69,26 +69,26 @@ class BinWalker:
             print(self.info)
             return False
 
-
-        # run(['binwalk', '-e', self.__file_path], stdout=DEVNULL, stderr=DEVNULL)
-        rand_port = randint(50000, 60000)
-        Popen(['binwalk', '-s', str(rand_port), '-e', self.__file_path], stdout=PIPE, stderr=PIPE)
+        print(f"{COLORS['INFO']}Extracting {self.__file_path} using binwalk{COLORS['RESET']}")
+        run(['binwalk', '-e', self.__file_path], stdout=DEVNULL, stderr=DEVNULL)
+        # rand_port = randint(50000, 60000)
+        # Popen(['binwalk', '-s', str(rand_port), '-e', self.__file_path], stdout=PIPE, stderr=PIPE)
         
-        while True:
-            try:
-                checker = socket(AF_INET, SOCK_STREAM)
-                checker.connect(('localhost', rand_port))
-                while data:=checker.recv(1024):
-                    print(f"{COLORS['INFO']}Binwalk Extracting: {data.decode()}\r", end=COLORS['RESET'])
+        # while True:
+        #     try:
+        #         checker = socket(AF_INET, SOCK_STREAM)
+        #         checker.connect(('localhost', rand_port))
+        #         while data:=checker.recv(1024):
+        #             print(f"{COLORS['INFO']}Binwalk Extracting: {data.decode()}\r", end=COLORS['RESET'])
                 
-                else:
-                    break
+        #         else:
+        #             break
 
-            except ConnectionRefusedError:
-                continue
-            except Exception as err:
-                print(err)
-                break
+        #     except ConnectionRefusedError:
+        #         continue
+        #     except Exception as err:
+        #         print(err)
+        #         break
             
         if path.exists(self.extract_dir):
             self.info = f"{COLORS['INFO']}binwalk extracted {self.__file_path} successfully{COLORS['RESET']}"
