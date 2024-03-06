@@ -23,7 +23,7 @@ class Flagger:
     processes: int # number of processes for all instances
     threads: int # number of threads for all instances
 
-    def __init__(self, filename, no_rot, walk=False):
+    def __init__(self, filename, no_rot, no_walk=True):
         valid_files = []
         if path.exists(filename):
             if path.isdir(filename):  # get all the valid files in the directory
@@ -31,7 +31,7 @@ class Flagger:
                 for file in valid_files:
                     Process(target=Flagger, args=(file, no_rot)).start()
                 return None # don't fetch flags for the directory itself
-            elif walk:
+            elif not no_walk:
                     walker = BinWalker(filename)
                     if walker.extracted:
                         files = listdir(walker.extract_dir)
@@ -292,7 +292,7 @@ def main():
 
     
     with ProcessPoolExecutor(max_workers=Flagger.processes) as executor:
-        executor.submit(Flagger, args.file_name, args.no_rot, walk=True)
+        executor.submit(Flagger, args.file_name, args.no_rot, no_walk=args.no_walk)
         
     # Process(target=Flagger, args=(args.file_name, args.no_rot)).start()  # create an instance of the class
 
