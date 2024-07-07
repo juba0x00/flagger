@@ -53,7 +53,15 @@ def is_png(file_path: str) -> bool:
             return image.format == 'PNG'
     except IOError:
         return False
-    
+
+# check is bmp image
+
+def is_bmp(file_path: str) -> bool:
+    try:
+        with Image.open(file_path) as image:
+            return image.format == "BMP"
+    except:
+        return False
 
 def get_valid_files(directory: str) -> list:
     valid_files = []
