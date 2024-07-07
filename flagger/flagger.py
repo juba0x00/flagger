@@ -46,9 +46,13 @@ class Flagger(EncodingChecker):
         self.file_name = filename
         self.no_rot = no_rot
 
-        self.strings_output = popen(
+        self.search_data = popen(
             f'strings "{self.file_name}" | sort -u ').read()  # didn't use readlines() to remove \n in the following line
-        self.strings_lines = self.strings_output.split('\n')
+        self.strings_lines = self.search_data.split('\n')
+        # check if the file is a PNG
+        if utils.is_png(self.file_name) or utils.is_bmp(self.file_name):
+            self.zsteg_output = popen(f'zsteg -a "{self.file_name}"').read()
+            self.search_data += self.zsteg_output
 
         # del self.strings_output
         self.__fetch()
@@ -142,7 +146,7 @@ class Flagger(EncodingChecker):
     def check_all_bases(self):
         for check in self.check_functions:
             try:
-                for encoding, encoded, decoded in check(self.strings_output, Flagger.flag_format):
+                for encoding, encoded, decoded in check(self.search_data, Flagger.flag_format):
                     Flagger.echo(encoding, encoded, decoded)
             except ValueError as e:
                 print(f'Error in {check.__name__}: {e}')
