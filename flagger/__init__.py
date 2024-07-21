@@ -3,7 +3,7 @@ from flagger.modules.banner import palestine
 from flagger.flagger import Flagger
 from flagger.modules import utils
 
-
+import sys
 def main():
     print(palestine)
     args = utils.parse_arguments()
@@ -20,4 +20,9 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        # kill all the child processes and threads
+        #TODO
+        ...

@@ -5,7 +5,6 @@ from os import popen, path, mkdir, listdir
 from re import findall
 from threading import Thread
 from requests import get
-from multiprocessing import Process
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 
 ##### local imports ####
@@ -20,27 +19,26 @@ class Flagger(EncodingChecker):
     verbose: bool  # unified verbose for all instances
     silent: bool  # unified silent for all instances
 
-    def __init__(self, filename, no_rot, walk=True):
+    def __init__(self, filename, no_rot, walk=True) -> None:
         super().__init__()
         valid_files = []
         if path.exists(filename):
             if path.isdir(filename):  # get all the valid files in the directory
                 valid_files = utils.get_valid_files(filename)
-                for file in valid_files:
-                    Process(target=Flagger, args=(file, no_rot)).start()
-                return None  # don't fetch flags for the directory itself
+
+                with ProcessPoolExecutor(max_workers=3) as executor:
+                    executor.map(Flagger, valid_files, [no_rot]*len(valid_files))
+
             elif walk:
                 walker = BinWalker(filename)
                 if walker.extracted:
                     files = listdir(walker.extract_dir)
-                    with ProcessPoolExecutor() as executor:
+                    with ProcessPoolExecutor(max_workers=3) as executor:
                         executor.map(Flagger, [f'{walker.extract_dir}/{extracted_file}' for extracted_file in files],
-                                     [False] * len(files), [False] * len(files))
-                    # for extracted_file in files:
-                    #     Process(target=Flagger, args=(f'{walker.extract_dir}/{extracted_file}', False, False)).start()
+                                    [False] * len(files), [False] * len(files))
 
         else:
-            print('File Not Found :(')
+            print(f'{filename} Not Found :(')
             exit(0)
 
         self.file_name = filename
@@ -103,10 +101,12 @@ class Flagger(EncodingChecker):
         return rotated_lines
 
     def rotate(self, key):
+        print(f'{self.file_name} start rot {key}')
         #  rotate and check after rotation
         with open(f'{self.file_name}_rotates/rot{key}', 'w') as saving_file:
             saving_file.writelines(f'{line}\n' for line in Flagger.rotator(self.strings_lines[:], key))
             # ? saving_file.writelines(f'{line}\n' for line in rotated_lines, key))
+        print(f'{self.file_name} end rot {key}')
 
     @staticmethod
     def shift(text, shifts):
@@ -155,21 +155,15 @@ class Flagger(EncodingChecker):
         if not self.no_rot:
             if not path.exists(f'{self.file_name}_rotates'):
                 mkdir(f'{self.file_name}_rotates')
+
+            # for i in range(1, 3):
+            #     self.rotate(i)
             with ThreadPoolExecutor() as executor:
                 executor.map(self.rotate, range(1, 26))
-            # for key in range(1, 26):
-            #     Thread(target=self.rotate, args=(key,)).start()
-
-            with ProcessPoolExecutor() as executor:
-                executor.map(self.rotate, range(1, 26))
-            # Process(target=Flagger, args=(f'{self.file_name}_rotates/', True)).start()  # don't rotate, avoid infinite loop
 
     def check_all_shifts(self):
         with ThreadPoolExecutor() as executor:
             executor.map(self.shift, [self.strings_lines[:]] * 24, range(2, 26))
-
-        # for shifts in range(2, 26):
-        #     Thread(target=self.shift, args=[self.strings_lines[:], shifts]).start() if not self.no_rot else None
 
     def check_all_hashes(self):
         if Flagger.online:
@@ -180,9 +174,9 @@ class Flagger(EncodingChecker):
         print(f'{"_" * 10} searching in {self.file_name} {"_" * 10}')
         self.check_all_bases()
 
-        # self.check_all_rotations()
-        #
-        # self.check_all_shifts()
-        #
-        # self.check_all_hashes()
+        self.check_all_rotations()
+
+        self.check_all_shifts()
+
+        self.check_all_hashes()
 

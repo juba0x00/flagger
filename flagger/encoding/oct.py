@@ -12,3 +12,7 @@ def oct_decode(word: str) -> str:
     for i in oct_to_ascii: ascii_to_str += chr(int(i))
 
     return ascii_to_str
+
+if __name__ == '__main__':
+
+    print(oct_encode('hi'))

@@ -25,13 +25,12 @@ pip install juba0x00-flagger
   - [x] unified coloring
   - [x] palestine flag banner 
   - [x] authors
-- [ ] binwalker __condition
+- [x] search in zsteg output
 - [x] enhance encoding checks
+- [ ] CyberChef https://github.com/gchq/CyberChef-server
 ### Not yet
 
 - [ ] Case insensitivity in bases checks
-- [ ] search in zsteg output
-- [ ] steghide
 - [ ] ROT8000
 
 ### DONE
@@ -51,7 +50,7 @@ pip install juba0x00-flagger
 - [x] Check internet connection before requesting nitrxgen
 - [x] utils
 - [ ] use binwalk module https://github.com/ReFirmLabs/binwalk/blob/master/API.md
-- [ ] try all in string 
+- [x] try all in string 
 
 ## Contributors ✨
 
