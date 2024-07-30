@@ -9,48 +9,17 @@
 - plain Challenge
 ![JCTF plain](ctf-demo/demo-jctf-plain.png)
 
+### Crowd-Security
+![Screenshot_20240306_111911](https://github.com/user-attachments/assets/a9d84025-1126-4533-92ee-2062dab1d2bf)
+
+
+![Screenshot_20240307_032503](https://github.com/user-attachments/assets/677e3ece-1516-4c71-bcdd-5656fd9f14a6)
+
+
 ## Installation
 ```bash
 pip install juba0x00-flagger
 ```
-
-## Todo List
-- [x] refactor
-  - [x] mandatory options
-  - [x] binwalker
-    - [x] refactor binwalker code
-    - [x] handle file path and extract path
-    - [x] binwalk progress
-  - [x] enhance oct_encode
-  - [x] unified coloring
-  - [x] palestine flag banner 
-  - [x] authors
-- [x] search in zsteg output
-- [x] enhance encoding checks
-- [ ] CyberChef https://github.com/gchq/CyberChef-server
-### Not yet
-
-- [ ] Case insensitivity in bases checks
-- [ ] ROT8000
-
-### DONE
-- [x] Fix rotations
-- [x] silent mode
-- [x] Search for the ROT13 of the flag (ROT1, ROT2, ... ROT26)
-- [x] Search for the plain-text flag 
-- [x] binwalk
-- [x] Search for the bases of the flag (base64, 42, ...)
-  - [x] base64
-  - [x] base45
-  - [x] base16 (hex)
-  - [x] base8 (octal)
-  - [x] base2 (binary)
-  - [x] base32
-  - [x] base85
-- [x] Check internet connection before requesting nitrxgen
-- [x] utils
-- [ ] use binwalk module https://github.com/ReFirmLabs/binwalk/blob/master/API.md
-- [x] try all in string 
 
 ## Contributors ✨
 
